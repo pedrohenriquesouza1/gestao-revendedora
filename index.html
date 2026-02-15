@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Estoque MVP</title>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Gestão de Estoque</h1>
+        </header>
+
+        <div class="grid-layout">
+            
+            <!-- 1. ADICIONAR -->
+            <section class="card destaque">
+                <h2>Adicionar Produto</h2>
+                <div class="form-stack">
+                    <div class="input-box">
+                        <label>Nome do Produto</label>
+                        <input type="text" id="input-nome" placeholder="Ex: Óleo de Motor">
+                    </div>
+                    
+                    <div class="row">
+                        <div class="input-box">
+                            <label>Preço Compra</label>
+                            <input type="number" id="input-compra" placeholder="0.00">
+                        </div>
+                        <div class="input-box">
+                            <label>Preço Venda</label>
+                            <input type="number" id="input-venda" placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <div class="input-box">
+                        <label>Quantidade</label>
+                        <input type="number" id="input-quant" placeholder="0">
+                    </div>
+
+                    <button id="btn-adicionar" class="btn primary">Adicionar</button>
+                </div>
+            </section>
+
+            <!-- COLUNA DIREITA -->
+            <div class="side-column">
+                
+                <!-- 2. BUSCAR -->
+                <section class="card">
+                    <h2>Buscar</h2>
+                    <div class="row">
+                        <input type="text" id="search-nome" placeholder="Nome do produto...">
+                        <button id="btn-buscar" class="btn secondary">Buscar</button>
+                    </div>
+                    <!-- Área de Resposta -->
+                    <div id="resultado-busca" class="result-area">
+                        <span class="placeholder-text">O resultado aparecerá aqui...</span>
+                    </div>
+                </section>
+
+                <!-- 3. REMOVER -->
+                <section class="card">
+                    <h2>Remover</h2>
+                    <div class="row">
+                        <input type="text" id="remove-nome" placeholder="Nome do produto...">
+                        <button id="btn-remover" class="btn danger">Remover</button>
+                    </div>
+                    <!-- Área de Resposta -->
+                    <div id="msg-remocao" class="result-area"></div>
+                </section>
+
+            </div>
+        </div>
+    </div>
+    <footer id="dedicate"><p>&copy; Pedro Henrique 2026</p></footer>
+    <script src="src/control.js"></script> 
+</body>
+</html>
