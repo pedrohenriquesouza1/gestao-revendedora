@@ -1,79 +1,144 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Estoque MVP</title>
+    <title>Gerenciador de pedidos</title>
+    <link rel="stylesheet" href="styles/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <div class="container">
-        <header>
-            <h1>Gestão de Estoque</h1>
-        </header>
+    <header>
+        <h1>Gerenciador De Pedidos / Gerador de Recibo</h1>
+    </header>
 
-        <div class="grid-layout">
+    <main class="container">
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="abrirAba('estoque', event)">📦 Estoque</button>
+            <button class="tab-btn" onclick="abrirAba('vendas', event)">💰 Vendas/Clientes</button>
+        </div>
+
+        <div id="aba-estoque" class="conteudo-aba ativo">
             
-            <!-- 1. ADICIONAR -->
-            <section class="card destaque">
-                <h2>Adicionar Produto</h2>
-                <div class="form-stack">
-                    <div class="input-box">
-                        <label>Nome do Produto</label>
-                        <input type="text" id="input-nome" placeholder="Ex: Óleo de Motor">
-                    </div>
-                    
-                    <div class="row">
-                        <div class="input-box">
-                            <label>Preço Compra</label>
-                            <input type="number" id="input-compra" placeholder="0.00">
-                        </div>
-                        <div class="input-box">
-                            <label>Preço Venda</label>
-                            <input type="number" id="input-venda" placeholder="0.00">
-                        </div>
-                    </div>
-
-                    <div class="input-box">
-                        <label>Quantidade</label>
-                        <input type="number" id="input-quant" placeholder="0">
-                    </div>
-
-                    <button id="btn-adicionar" class="btn primary">Adicionar</button>
+            <section class="card">
+                <h2>Novo Produto</h2>
+                <div class="form-group">
+                    <label>Nome do Produto</label>
+                    <input type="text" id="input-nome" placeholder="Ex: Malbec">
                 </div>
+                <div class="row">
+                    <div class="form-group half">
+                        <label>R$ Compra</label>
+                        <input type="number" id="input-compra" step="0.01">
+                    </div>
+                    <div class="form-group half">
+                        <label>R$ Venda</label>
+                        <input type="number" id="input-venda" step="0.01">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Quantidade</label>
+                    <input type="number" id="input-quant">
+                </div>
+                <button id="btn-adicionar" class="btn btn-primary">Adicionar</button>
             </section>
 
-            <!-- COLUNA DIREITA -->
-            <div class="side-column">
-                
-                <!-- 2. BUSCAR -->
-                <section class="card">
-                    <h2>Buscar</h2>
-                    <div class="row">
-                        <input type="text" id="search-nome" placeholder="Nome do produto...">
-                        <button id="btn-buscar" class="btn secondary">Buscar</button>
-                    </div>
-                    <!-- Área de Resposta -->
-                    <div id="resultado-busca" class="result-area">
-                        <span class="placeholder-text">O resultado aparecerá aqui...</span>
-                    </div>
-                </section>
+            <section class="card">
+                <h2>Buscar no Estoque</h2>
+                <div class="search-box">
+                    <input type="text" id="search-nome" placeholder="Digite o nome...">
+                    <button id="btn-buscar" class="btn btn-secondary">🔍</button>
+                </div>
+                <div id="resultado-busca" class="result-box"></div>
+            </section>
 
-                <!-- 3. REMOVER -->
-                <section class="card">
-                    <h2>Remover</h2>
-                    <div class="row">
-                        <input type="text" id="remove-nome" placeholder="Nome do produto...">
-                        <button id="btn-remover" class="btn danger">Remover</button>
-                    </div>
-                    <!-- Área de Resposta -->
-                    <div id="msg-remocao" class="result-area"></div>
-                </section>
-
-            </div>
+            <section class="card">
+                <h2>Remover Item</h2>
+                <div class="search-box">
+                    <input type="text" id="remove-nome" placeholder="Nome para excluir...">
+                    <button id="btn-remover" class="btn btn-danger">🗑️</button>
+                </div>
+                <div id="msg-remocao" class="result-box"></div>
+            </section>
         </div>
-    </div>
-    <footer id="dedicate"><p>&copy; Pedro Henrique 2026</p></footer>
-    <script src="src/control.js"></script> 
+
+        <div id="aba-vendas" class="conteudo-aba">
+            
+            <section class="card destaque">
+                <h2>Nova Venda</h2>
+                <div class="form-group">
+                    <label>Nome da Cliente</label>
+                    <input type="text" id="venda-cliente-nome" placeholder="Quem comprou?">
+                </div>
+                <div class="form-group">
+                    <label>Produto (Do Estoque)</label>
+                    <input type="text" id="venda-produto-nome" placeholder="Nome do produto">
+                </div>
+                <div class="row">
+                    <div class="form-group half">
+                        <label>Qtd</label>
+                        <input type="number" id="venda-qtd" value="1">
+                    </div>
+                    <div class="form-group half">
+                        <label>Data</label>
+                        <input type="date" id="venda-data">
+                    </div>
+                </div>
+                <button id="btn-confirmar-venda" class="btn btn-success">Confirmar Venda</button>
+                <div id="msg-venda" class="result-box"></div>
+            </section>
+
+            <section class="card">
+                <h2>Histórico da Cliente</h2>
+                <div class="search-box">
+                    <input type="text" id="historico-cliente-busca" placeholder="Nome da cliente...">
+                    <button id="btn-buscar-historico" class="btn btn-secondary">Ver</button>
+                </div>
+                
+                <div class="tabela-container">
+                    <table id="tabela-historico">
+                        <thead>
+                            <tr>
+                                <th>Produto</th>
+                                <th>Qtd</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="corpo-tabela">
+                            <tr><td colspan="3" style="text-align:center">Pesquise acima...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="total-gasto-cliente" style="text-align: right; font-weight: bold; margin-top: 10px;"></div>
+            </section>
+        </div>
+
+    </main>
+
+    <script src="script.js"></script>
+
+    <script>
+        function abrirAba(nomeAba, evento) {
+            var conteudos = document.getElementsByClassName("conteudo-aba");
+            for (var i = 0; i < conteudos.length; i++) {
+                conteudos[i].classList.remove("ativo");
+            }
+
+            var botoes = document.getElementsByClassName("tab-btn");
+            for (var i = 0; i < botoes.length; i++) {
+                botoes[i].classList.remove("active");
+            }
+
+            document.getElementById('aba-' + nomeAba).classList.add("ativo");
+
+            if (evento) {
+                evento.currentTarget.classList.add("active");
+            }
+        }
+
+        document.getElementById('venda-data').valueAsDate = new Date();
+    </script>
 </body>
 </html>

@@ -43,6 +43,14 @@ class Produto {
         }
         console.log(`vendidos ${quantVend} produtos`)
     }
+
+    get precoVenda() {
+        return this.#precoVenda;
+    }
+
+    get quant() {
+        return this.#quant
+    }
 }
 
 class Estoque {
@@ -227,12 +235,26 @@ document.getElementById('remove-nome').addEventListener('input', function() {
 
 //debug das adições temporário
 function venderProduto(produtoSolicitado, qtd, parcelas, data) {
-    // 1. Dar baixa no estoque do produto
     produtoSolicitado.darBaixa(qtd);
 
-    // 2. Criar a venda usando o preço que vem do produto
-    // (Lembre-se que para isso o precoVenda precisa ser acessível)
     const novaVenda = new Venda("Cliente Exemplo", parcelas, data, produtoSolicitado.precoVenda * qtd);
     
     return novaVenda.resumoVenda();
 }
+
+function fazerVenda(nomeProduto, quantidadeVenda, parcelas, dtpParcela) {
+    try {
+        nomeProduto.darBaixa(quantidadeVenda)
+        const totalVenda = nomeProduto.precoVenda * quantidadeVenda
+        const novaVenda = new Venda(
+            "Nome Cliente mãe", 
+            parcelas, 
+            dtpParcela,
+            totalVenda 
+        );
+        return novaVenda.resumoVenda()
+    } catch (erro) {
+        console.error(`não foi possível concluir a venda, tente novamente ${erro.message}`)
+    }
+}
+
