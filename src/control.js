@@ -39,7 +39,7 @@ class Produto {
         if (quantVend <= this.#quant) {
             this.#quant -= quantVend
         } else if (quantVend >= this.#quant) {
-            window.alert("produtos insuficientes para vender! mude a quantidade de produtos vendidos")
+            throw new Error("produtos insuficientes para vender! mude a quantidade de produtos vendidos")
         }
         console.log(`vendidos ${quantVend} produtos`)
     }
@@ -233,28 +233,42 @@ document.getElementById('remove-nome').addEventListener('input', function() {
     remRes.style.borderLeft = "none"
 })
 
-//debug das adições temporário
 function venderProduto(produtoSolicitado, qtd, parcelas, data) {
-    produtoSolicitado.darBaixa(qtd);
+    const transformJson = JSON.parse(localStorage.getItem('produto'));
+    const newproduto = new Produto(
+        transformJson.nomeProduto,
+        transformJson.precoVenda,
+        transformJson.quantidade
+    )
 
+    newproduto.darBaixa(qtd);
+    const vTotal = newproduto.precoVenda * qtd
     const novaVenda = new Venda("Cliente Exemplo", parcelas, data, produtoSolicitado.precoVenda * qtd);
-    
-    return novaVenda.resumoVenda();
+    const resumoP = novaVenda.resumoVenda();
+    return {
+        produto: produtoSolicitado.nome,
+        total: vTotal,
+        parcela: resumoP
+    }
 }
 
-function fazerVenda(nomeProduto, quantidadeVenda, parcelas, dtpParcela) {
+
+function fazerVenda(nomeProduto, quantidadeVenda) {
     try {
         nomeProduto.darBaixa(quantidadeVenda)
         const totalVenda = nomeProduto.precoVenda * quantidadeVenda
+        const nomeCliente = document.getElementById('venda-cliente-nome').value;
+        const parcelas = parseInt(document.getElementById('venda-parcelas').value)
+        const dataParcela = document.getElementById('venda-data').value
+
         const novaVenda = new Venda(
-            "Nome Cliente mãe", 
-            parcelas, 
-            dtpParcela,
-            totalVenda 
+            nomeCliente,
+            parcelas,
+            dataParcela,
+            totalVenda
         );
         return novaVenda.resumoVenda()
     } catch (erro) {
         console.error(`não foi possível concluir a venda, tente novamente ${erro.message}`)
     }
 }
-
