@@ -233,42 +233,51 @@ document.getElementById('remove-nome').addEventListener('input', function() {
     remRes.style.borderLeft = "none"
 })
 
-function venderProduto(produtoSolicitado, qtd, parcelas, data) {
-    const transformJson = JSON.parse(localStorage.getItem('produto'));
-    const newproduto = new Produto(
-        transformJson.nomeProduto,
-        transformJson.precoVenda,
-        transformJson.quantidade
-    )
+function fazerVenda() {
+    document.getElementById('btn-confirmar-venda').addEventListener('click', function() {
+        try {
+            const quantidadeEstoque = Number(document.getElementById('venda-qtd').value)
+            const name = document.getElementById('venda-cliente-nome').value 
+            const parcelas = Number(document.getElementById('venda-parcelas').value)
+            const data = new Date (document.getElementById('venda-data').value)
+            const nomeProduto = document.getElementById('venda-produto-nome').value
+            const dataAtual = new Date()
 
-    newproduto.darBaixa(qtd);
-    const vTotal = newproduto.precoVenda * qtd
-    const novaVenda = new Venda("Cliente Exemplo", parcelas, data, produtoSolicitado.precoVenda * qtd);
-    const resumoP = novaVenda.resumoVenda();
-    return {
-        produto: produtoSolicitado.nome,
-        total: vTotal,
-        parcela: resumoP
-    }
-}
+            const produto = gerenciadorEstoque.search(nomeProduto)
 
+            if(!produto) {
+                throw new Error('Erro! produto não encontrado, digite novamente')
+            } 
 
-function fazerVenda(nomeProduto, quantidadeVenda) {
-    try {
-        nomeProduto.darBaixa(quantidadeVenda)
-        const totalVenda = nomeProduto.precoVenda * quantidadeVenda
-        const nomeCliente = document.getElementById('venda-cliente-nome').value;
-        const parcelas = parseInt(document.getElementById('venda-parcelas').value)
-        const dataParcela = document.getElementById('venda-data').value
+            const total = produto.precoVenda * quantidadeEstoque
 
-        const novaVenda = new Venda(
-            nomeCliente,
-            parcelas,
-            dataParcela,
-            totalVenda
-        );
-        return novaVenda.resumoVenda()
-    } catch (erro) {
-        console.error(`não foi possível concluir a venda, tente novamente ${erro.message}`)
-    }
+            if(parcelas < 1) {
+                throw new Error('As parcelas devem ser iguais ou maiores que 1')
+            }
+
+            if (data < dataAtual) {
+                throw new Error('a data tem que ser maior que a data de hoje')
+            }
+
+            if (isNaN(total)) {
+                throw new Error('Preço de venda não existe, preencha o campo e tente novamente')
+            }
+
+            const venda = new Venda(
+                name,
+                parcelas,
+                data,
+                total
+            );
+            const dado = localStorage.getItem('vendas')
+            const listaVenda = dado ? JSON.parse(dado) : []
+
+            listaVenda.push(venda)
+            localStorage.setItem('vendas', JSON.stringify(listaVenda)) 
+
+            produto.darBaixa(quantidadeEstoque)
+        } catch (erro) {
+            console.error(erro.message)
+        }
+    });
 }
