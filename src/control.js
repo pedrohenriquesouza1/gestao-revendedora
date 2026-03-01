@@ -112,11 +112,13 @@ class Venda {
     #nParcelas
     #dataCobranca
     #valorTotal
-    constructor(nomeCliente, nParcelas, dataCobranca, valorTotal) {
+    #itens
+    constructor(nomeCliente, nParcelas, dataCobranca, valorTotal, itens = []) {
         this.#nomeCliente = nomeCliente
         this.#nParcelas = nParcelas
         this.#dataCobranca = new Date(dataCobranca)
         this.#valorTotal = valorTotal
+        this.#itens = itens
     }
 
     parcelas() {
@@ -153,6 +155,10 @@ class Venda {
             resumoRecibo.push(resumoParcela)
         }
         return resumoRecibo
+    }
+
+    get itens() {
+        return this.#itens
     }
 }
 
@@ -245,6 +251,10 @@ function fazerVenda() {
 
             const produto = gerenciadorEstoque.search(nomeProduto)
 
+            const item = {
+                //fazer isso
+            }
+
             if(!produto) {
                 throw new Error('Erro! produto não encontrado, digite novamente')
             } 
@@ -267,8 +277,11 @@ function fazerVenda() {
                 name,
                 parcelas,
                 data,
-                total
+                total,
+                itens
             );
+            const itens = venda.itens
+
             const dado = localStorage.getItem('vendas')
             const listaVenda = dado ? JSON.parse(dado) : []
 
