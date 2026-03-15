@@ -160,6 +160,16 @@ class Venda {
     get itens() {
         return this.#itens
     }
+
+    toJSON() {
+        return {
+            nomeC: this.#nomeCliente,
+            parcelas: this.#nParcelas,
+            data: this.#dataCobranca.toISOString(),
+            total: this.#valorTotal,
+            itens: this.#itens 
+        }
+    }
 }
 
 const gerenciadorEstoque = new Estoque()
@@ -251,13 +261,10 @@ function fazerVenda() {
 
             const produto = gerenciadorEstoque.search(nomeProduto)
 
-            const item = {
-                //fazer isso
-            }
-
             if(!produto) {
                 throw new Error('Erro! produto não encontrado, digite novamente')
             } 
+
 
             const total = produto.precoVenda * quantidadeEstoque
 
@@ -272,7 +279,17 @@ function fazerVenda() {
             if (isNaN(total)) {
                 throw new Error('Preço de venda não existe, preencha o campo e tente novamente')
             }
+            gerenciadorEstoque.salvarDados()
+            produto.darBaixa(quantidadeEstoque)
 
+            const item = {
+                nome: nomeProduto,
+                quantidadeVendida: quantidadeEstoque
+            }
+
+            
+
+            const itens = [item]
             const venda = new Venda(
                 name,
                 parcelas,
@@ -280,7 +297,8 @@ function fazerVenda() {
                 total,
                 itens
             );
-            const itens = venda.itens
+
+            
 
             const dado = localStorage.getItem('vendas')
             const listaVenda = dado ? JSON.parse(dado) : []
@@ -288,7 +306,6 @@ function fazerVenda() {
             listaVenda.push(venda)
             localStorage.setItem('vendas', JSON.stringify(listaVenda)) 
 
-            produto.darBaixa(quantidadeEstoque)
         } catch (erro) {
             console.error(erro.message)
         }
