@@ -1,3 +1,5 @@
+let ultima_venda = null
+
 class Produto {
     #nome
     #precoCompra
@@ -199,7 +201,7 @@ document.getElementById('btn-adicionar').addEventListener('click', function() {
     inputprecoCompra.value = ""
     inputprecoVenda.value = ""
     inputQuant.value = ""
-})
+});
 //pra buscar o produto, eu só copiei de cima o esqueleto, já estava moído
 document.getElementById('btn-buscar').addEventListener('click', function() {
     const nomeBuscado = document.getElementById('search-nome').value
@@ -217,7 +219,7 @@ document.getElementById('btn-buscar').addEventListener('click', function() {
         divRes.style.borderLeft = '4px solid #d32f2f'
     }
     
-}) 
+});
 //remove o produto, aqui eu fiz a mesma coisa dos outros dois
 document.getElementById('btn-remover').addEventListener('click', function(){
     const nomRem = document.getElementById('remove-nome').value
@@ -235,7 +237,7 @@ document.getElementById('btn-remover').addEventListener('click', function(){
         resRem.innerHTML = `<p style="color: orange;">Erro: Não foi possível remover. Produto não encontrado.</p>`
         resRem.style.borderLeft = "4px solid #d32f2f"
     }
-})
+});
 //frescurinha para a UX
 document.getElementById('search-nome').addEventListener('input', function() {
     const divRes = document.getElementById('resultado-busca');
@@ -247,9 +249,12 @@ document.getElementById('remove-nome').addEventListener('input', function() {
     const remRes = document.getElementById('msg-remocao')
     remRes.innerHTML = '<span class="placeholder-text">Se remover algum produto, ele aparece aqui...</span>'
     remRes.style.borderLeft = "none"
-})
+});
 
-function fazerVenda() {
+function fazerVenda() {            
+    const nomBus = document.getElementById('search-nome').value
+    const caixaMensagem = document.getElementById('msg-venda')
+
     document.getElementById('btn-confirmar-venda').addEventListener('click', function() {
         try {
             const quantidadeEstoque = Number(document.getElementById('venda-qtd').value)
@@ -279,8 +284,8 @@ function fazerVenda() {
             if (isNaN(total)) {
                 throw new Error('Preço de venda não existe, preencha o campo e tente novamente')
             }
-            gerenciadorEstoque.salvarDados()
             produto.darBaixa(quantidadeEstoque)
+            gerenciadorEstoque.salvarDados()
 
             const item = {
                 nome: nomeProduto,
@@ -298,16 +303,60 @@ function fazerVenda() {
                 itens
             );
 
-            
+            ultima_venda = venda
+
 
             const dado = localStorage.getItem('vendas')
             const listaVenda = dado ? JSON.parse(dado) : []
 
             listaVenda.push(venda)
             localStorage.setItem('vendas', JSON.stringify(listaVenda)) 
-
+             
+                caixaMensagem.innerHTML = '<p style="color: green;">✅ Venda confirmada com sucesso!</p>';
+                caixaMensagem.style.borderLeft = "4px solid green";
         } catch (erro) {
-            console.error(erro.message)
+            console.error(erro.message) 
+            caixaMensagem.innerHTML = `<p style="color: red;">${erro.message}.</p>`;
+            caixaMensagem.style.borderLeft = "4px solid red";
         }
     });
 }
+
+const btnPdf = document.querySelector('#btn-gerar-pdf')
+btnPdf.addEventListener("click", function () {
+    if (!ultima_venda) {
+        window.alert('Você precisa de vender um produto para obter o recibo')
+        throw new Error('Você precisa de vender um produto para obter o recibo')
+    }
+
+    const {jsPDF} = window.jspdf;
+    const doc = new jsPDF();
+    const dadosDaVenda = ultima_venda.toJSON()
+    const itens = dadosDaVenda.itens
+
+    doc.setFontSize(18)
+    doc.setFont("Times", "bold")
+    doc.text("Recibo Cliente", 15, 20)
+    doc.setDrawColor(180).line(15, 23, 195, 23)
+
+    doc.setFontSize(12)
+    doc.setFont("helvetica", "normal")
+    doc.text(`Nome do(a) Cliente: ${dadosDaVenda.nomeC}`, 15, 30)
+    doc.text(`Valor total: ${dadosDaVenda.total}`, 15, 37, { align: "right"})
+    doc.text(`Data da Venda: ${dadosDaVenda.data}`)
+
+    const paraPDF = itens.map(item => {
+        return [item.nome, item.quantidadeVendida];
+    });
+
+    doc.autoTable({
+        startY: 45,
+        head: [['Produto', 'Quantidade']],
+        body: paraPDF,
+        theme: 'grid',
+        headStyles: { fillColor: [30, 130, 255]}
+    });
+
+    doc.save(`Recibo-${dadosDaVenda.nomeC}.pdf`)
+});
+    
