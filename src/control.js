@@ -41,7 +41,7 @@ class Produto {
         if (quantVend <= this.#quant) {
             this.#quant -= quantVend
         } else if (quantVend >= this.#quant) {
-            throw new Error("produtos insuficientes para vender! mude a quantidade de produtos vendidos")
+            return "A quantidade de itens que você está tendando vender é maior que a quantidade de itens que existe"
         }
         console.log(`vendidos ${quantVend} produtos`)
     }
@@ -257,6 +257,9 @@ function fazerVenda() {
 
     document.getElementById('btn-confirmar-venda').addEventListener('click', function() {
         try {
+            caixaMensagem.innerHTML = ''
+            caixaMensagem.style.borderLeft = 'none'
+
             const quantidadeEstoque = Number(document.getElementById('venda-qtd').value)
             const name = document.getElementById('venda-cliente-nome').value 
             const parcelas = Number(document.getElementById('venda-parcelas').value)
@@ -292,7 +295,9 @@ function fazerVenda() {
                 quantidadeVendida: quantidadeEstoque
             }
 
-            
+            if (item.quantidadeVendida == 0 || item.quantidadeVendida < 0) {
+                gerenciadorEstoque.remove(nomeProduto)
+            }
 
             const itens = [item]
             const venda = new Venda(
@@ -304,7 +309,7 @@ function fazerVenda() {
             );
 
             ultima_venda = venda
-
+            dataAtual.setHours(0, 0, 0, 0, 0)
 
             const dado = localStorage.getItem('vendas')
             const listaVenda = dado ? JSON.parse(dado) : []
@@ -312,12 +317,13 @@ function fazerVenda() {
             listaVenda.push(venda)
             localStorage.setItem('vendas', JSON.stringify(listaVenda)) 
              
-                caixaMensagem.innerHTML = '<p style="color: green;">✅ Venda confirmada com sucesso!</p>';
-                caixaMensagem.style.borderLeft = "4px solid green";
+            caixaMensagem.innerHTML = '<p style="color: green;">✅ Venda confirmada com sucesso!</p>';
+            caixaMensagem.style.borderLeft = "4px solid green";
         } catch (erro) {
             console.error(erro.message) 
             caixaMensagem.innerHTML = `<p style="color: red;">${erro.message}.</p>`;
             caixaMensagem.style.borderLeft = "4px solid red";
+            console.log("Sistema pronto para nova tentativa");
         }
     });
 }
@@ -332,7 +338,10 @@ btnPdf.addEventListener("click", function () {
     const {jsPDF} = window.jspdf;
     const doc = new jsPDF();
     const dadosDaVenda = ultima_venda.toJSON()
+    const parcelas = ultima_venda.resumoVenda()
     const itens = dadosDaVenda.itens
+    const dataVenda = new Date(dadosDaVenda.data).toLocaleString('pt-br')
+    const vFormatado = dadosDaVenda.total.toFixed(2)
 
     doc.setFontSize(18)
     doc.setFont("Times", "bold")
@@ -342,8 +351,8 @@ btnPdf.addEventListener("click", function () {
     doc.setFontSize(12)
     doc.setFont("helvetica", "normal")
     doc.text(`Nome do(a) Cliente: ${dadosDaVenda.nomeC}`, 15, 30)
-    doc.text(`Valor total: ${dadosDaVenda.total}`, 15, 37, { align: "right"})
-    doc.text(`Data da Venda: ${dadosDaVenda.data}`)
+    doc.text(`Valor total: R$${vFormatado}`, 195, 30, { align: 'right'})
+    doc.text(`Data da Venda: ${dataVenda}`, 85, 37, {align: 'right'})
 
     const paraPDF = itens.map(item => {
         return [item.nome, item.quantidadeVendida];
@@ -354,7 +363,26 @@ btnPdf.addEventListener("click", function () {
         head: [['Produto', 'Quantidade']],
         body: paraPDF,
         theme: 'grid',
-        headStyles: { fillColor: [30, 130, 255]}
+        headStyles: { fillColor: [181, 181, 181]}
+    });
+
+    const paraParcPDF = parcelas.map(pm => {
+        return [pm.numero, pm.preco, pm.vencimento]
+    });
+
+    doc.text('Parcelamentos', 15, doc.lastAutoTable.finalY + 15)
+
+    doc.autoTable({
+        startY: doc.lastAutoTable.finalY + 20,
+        head: [['Parcela', 'Valor', 'Data de Vencimento']],
+        body: paraParcPDF,
+        theme: 'grid',
+        headStyles: {fillColor: [181, 181, 181]},
+        columnStyles: {
+            0: {halign: 'Center'},
+            1: {halign: 'right'},
+            2: {halign: 'center'}
+        }
     });
 
     doc.save(`Recibo-${dadosDaVenda.nomeC}.pdf`)
