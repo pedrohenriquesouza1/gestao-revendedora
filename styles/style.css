@@ -261,6 +261,23 @@ td small {
     padding: 10px 0;
 }
 
+#btn-confirmar-venda {
+    margin-top: 15px;
+}
+
+#btn-adicionar-item-venda {
+    background-color: transparent;
+    border: 2px dashed var(--accent-color);
+    color: var(--accent-color);
+}
+
+#btn-adicionar-item-venda:hover, 
+#btn-adicionar-item-venda:active {
+    background-color: var(--accent-color);
+    color: white;
+    transition: ease-in-out, .3s;
+}
+
 .btn-pdf {
     background-color: #34495e; 
     margin-top: 15px;

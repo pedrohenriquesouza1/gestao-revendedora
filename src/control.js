@@ -1,4 +1,5 @@
 let ultima_venda = null
+let shop = []
 
 class Produto {
     #nome
@@ -297,6 +298,24 @@ function fazerVenda() {
 
             if (item.quantidadeVendida == 0 || item.quantidadeVendida < 0) {
                 gerenciadorEstoque.remove(nomeProduto)
+            }
+
+            let f = false 
+
+            for (let item of shop) {
+                if (item.nome === nomeProduto) {
+                    item.quantidadeVendida += quantidadeEstoque
+                    f = true
+                    break
+                } 
+            }
+
+            if (!f) {
+                shop.push({
+                    nome: nomeProduto,
+                    quantidadeVendida: quantidadeEstoque,
+                    preco: produto.precoCompra
+                });
             }
 
             const itens = [item]
