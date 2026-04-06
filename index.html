@@ -12,6 +12,16 @@
 
     <header>
         <h1>Gerenciador De Pedidos / Gerador de Recibo</h1>
+
+        <button id="btn-carrinho" class="btn-carrinho" aria-label="Ver Carrinho">
+                <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                </svg>
+                <span id="contador-carrinho" class="badge-carrinho">0</span>
+        </button> 
+        <div id="msg-carrinho"></div>
     </header>
 
     <main class="container">
@@ -92,7 +102,7 @@
                     </div>
                 </div>
                 <button id="btn-adicionar-item-venda" class="btn btn-primary">Adicionar Produto</button>
-                <button id="btn-confirmar-venda" class="btn btn-success" onclick="fazerVenda()">Confirmar Venda</button>
+                <button id="btn-confirmar-venda" class="btn btn-success">Confirmar Venda</button>
                 <div id="msg-venda" class="result-box"></div>
                 <button id="btn-gerar-pdf" class="btn btn-pdf"> Gerar Recibo em PDF</button>
             </section>
@@ -129,13 +139,32 @@
         <a href="https://www.flaticon.com/free-icons/inventory" title="inventory icons">Inventory icons created by Freepik - Flaticon</a>
     </footer>
 
+    <div id="modal-carrinho" style="display: none;">
+        <div class="modal-conteudo">
+            
+            <div class="modal-header">
+                <h2>Seu Carrinho</h2>
+                <button id="btn-fechar-modal" class="btn-fechar">&times;</button>
+            </div>
+            
+            <div id="lista-carrinho">
+                
+            </div>
+
+            <div id="mensagem-carrinho"></div>
+
+            <button id="btn-finalizar-carrinho" class="btn btn-success">Pronto</button>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js" integrity="sha512-+EeCylkt9WHJk5tGJxYdecHOcXFRME7qnbsfeMsdQL6NUPYm2+uGFmyleEqsmVoap/f3dN/sc3BX9t9kHXkHHg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <!--lib jspdf-->
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/5.0.2/jspdf.plugin.autotable.min.js" integrity="sha512-JizZOUNesiGhMcp9fsA/9W31FOat6QysBM8hSj6ir8iIANIUJ2mhko7Lo1+j0ErftmJ8SebMZLm9iielKjeIEQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <!--plugin de tabela do jspdf-->
 
-    <script src="src/control.js"></script> <!-- ainda em desenvolvimento... -->
+    <script type="module" src="src/control.js"></script> <!-- ainda em desenvolvimento... -->
+    <script type="module" src="src/modal.js"></script>
 
     <script>
         function abrirAba(nomeAba, evento) {

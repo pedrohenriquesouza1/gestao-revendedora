@@ -1,5 +1,6 @@
+import { renderShop } from "./modal.js"
+export let shop = []
 let ultima_venda = null
-let shop = []
 
 class Produto {
     #nome
@@ -45,6 +46,10 @@ class Produto {
             return "A quantidade de itens que você está tendando vender é maior que a quantidade de itens que existe"
         }
         console.log(`vendidos ${quantVend} produtos`)
+    }
+
+    get precoCompra() {
+        return this.#precoCompra
     }
 
     get precoVenda() {
@@ -252,89 +257,84 @@ document.getElementById('remove-nome').addEventListener('input', function() {
     remRes.style.borderLeft = "none"
 });
 
-function fazerVenda() {            
-    const nomBus = document.getElementById('search-nome').value
-    const caixaMensagem = document.getElementById('msg-venda')
+//função que adiciona produtos no carrinho, essa daqui só cuida da lógica, o código do modal está em outro arquivo
+document.getElementById("btn-adicionar-item-venda").addEventListener("click", function() {    
+    const quantidadeEstoque = Number(document.getElementById('venda-qtd').value)
+    const nomeProduto = document.getElementById('venda-produto-nome').value
+    const produto = gerenciadorEstoque.search(nomeProduto)
 
-    document.getElementById('btn-confirmar-venda').addEventListener('click', function() {
+    let f = false 
+
+    for (let item of shop) {
+        if (item.nome === nomeProduto) {
+            item.quantidadeVendida += quantidadeEstoque
+            f = true
+            break
+        } 
+    }
+
+    if (!f) {
+        shop.push({
+            nome: nomeProduto,
+            quantidadeVendida: quantidadeEstoque,
+            preco: produto.precoCompra
+        });
+    }
+    console.log(shop)
+    renderShop(shop)
+});
+const caixaMensagem = document.getElementById('msg-venda')
+document.getElementById('btn-confirmar-venda').addEventListener('click', function() {
         try {
             caixaMensagem.innerHTML = ''
             caixaMensagem.style.borderLeft = 'none'
 
-            const quantidadeEstoque = Number(document.getElementById('venda-qtd').value)
             const name = document.getElementById('venda-cliente-nome').value 
             const parcelas = Number(document.getElementById('venda-parcelas').value)
             const data = new Date (document.getElementById('venda-data').value)
-            const nomeProduto = document.getElementById('venda-produto-nome').value
             const dataAtual = new Date()
 
-            const produto = gerenciadorEstoque.search(nomeProduto)
+            let valorTotal = 0
+            dataAtual.setHours(0, 0, 0, 0, 0)
+            
+            if (shop.length === 0) throw new Error('O carrinho está vazio!');
+            if (parcelas < 1) throw new Error('As parcelas devem ser iguais ou maiores que 1');
+            if (data < dataAtual) throw new Error('A data tem que ser maior ou igual a hoje');
+            if (name === "") throw new Error('Preencha o nome da cliente!');
 
-            if(!produto) {
-                throw new Error('Erro! produto não encontrado, digite novamente')
-            } 
-
-
-            const total = produto.precoVenda * quantidadeEstoque
-
-            if(parcelas < 1) {
-                throw new Error('As parcelas devem ser iguais ou maiores que 1')
-            }
-
-            if (data < dataAtual) {
-                throw new Error('a data tem que ser maior que a data de hoje')
-            }
-
-            if (isNaN(total)) {
-                throw new Error('Preço de venda não existe, preencha o campo e tente novamente')
-            }
-            produto.darBaixa(quantidadeEstoque)
-            gerenciadorEstoque.salvarDados()
-
-            const item = {
-                nome: nomeProduto,
-                quantidadeVendida: quantidadeEstoque
-            }
-
-            if (item.quantidadeVendida == 0 || item.quantidadeVendida < 0) {
-                gerenciadorEstoque.remove(nomeProduto)
-            }
-
-            let f = false 
 
             for (let item of shop) {
-                if (item.nome === nomeProduto) {
-                    item.quantidadeVendida += quantidadeEstoque
-                    f = true
-                    break
-                } 
+                const produtoNEstoque = gerenciadorEstoque.search(item.nome)
+                
+                if(!produtoNEstoque) {
+                    throw new Error(`O produto ${item.nome} não existe no estoque`)
+                }
+
+                produtoNEstoque.darBaixa(item.quantidadeVendida)
+                
+                let subTot = item.quantidadeVendida * produtoNEstoque.precoVenda
+
+                valorTotal += subTot
             }
 
-            if (!f) {
-                shop.push({
-                    nome: nomeProduto,
-                    quantidadeVendida: quantidadeEstoque,
-                    preco: produto.precoCompra
-                });
-            }
-
-            const itens = [item]
             const venda = new Venda(
                 name,
                 parcelas,
                 data,
-                total,
-                itens
+                valorTotal,
+                shop
             );
 
             ultima_venda = venda
-            dataAtual.setHours(0, 0, 0, 0, 0)
 
             const dado = localStorage.getItem('vendas')
             const listaVenda = dado ? JSON.parse(dado) : []
 
             listaVenda.push(venda)
             localStorage.setItem('vendas', JSON.stringify(listaVenda)) 
+
+            shop.length = 0
+            renderShop(shop)
              
             caixaMensagem.innerHTML = '<p style="color: green;">✅ Venda confirmada com sucesso!</p>';
             caixaMensagem.style.borderLeft = "4px solid green";
@@ -342,10 +342,9 @@ function fazerVenda() {
             console.error(erro.message) 
             caixaMensagem.innerHTML = `<p style="color: red;">${erro.message}.</p>`;
             caixaMensagem.style.borderLeft = "4px solid red";
-            console.log("Sistema pronto para nova tentativa");
         }
-    });
-}
+});
+
 
 const btnPdf = document.querySelector('#btn-gerar-pdf')
 btnPdf.addEventListener("click", function () {

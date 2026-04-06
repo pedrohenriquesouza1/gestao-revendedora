@@ -1,0 +1,17 @@
+{
+  "name": "projeto-ctrl-boticario",
+  "version": "1.0.0",
+  "description": "This project is a pragmatic solution developed to automate the generation of sales receipts and inventory management for a beauty products reseller. It replaces manual paperwork with an automated system that calculates installments, due dates, and generates PDF receipts.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "vite": "^8.0.3"
+  }
+}

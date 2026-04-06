@@ -1,0 +1,67 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 9999;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.overlay :global(.modal-conteudo) {
+    background-color: #ffffff;
+    width: 90%;
+    max-width: 400px;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    
+    transform: translateY(20px);
+    transition: transform 0.3s ease;
+}
+
+.open :global(.modal-conteudo) {
+    transform: translateY(0);
+}
+
+.overlay :global(.modal-header) {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.overlay :global(.modal-header h2) {
+    font-size: 1.2rem;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.overlay :global(.btn-fechar) {
+    background: none;
+    border: none;
+    font-size: 28px;
+    line-height: 1;
+    color: #999;
+    cursor: pointer;
+    padding: 0 5px;
+}
+
+.overlay :global(.btn-fechar:active) {
+    color: #c0392b;
+}
