@@ -280,9 +280,9 @@ document.getElementById("btn-adicionar-item-venda").addEventListener("click", fu
             preco: produto.precoCompra
         });
     }
-    console.log(shop)
     renderShop(shop)
 });
+//Função de venda, totalmente refatorada
 const caixaMensagem = document.getElementById('msg-venda')
 document.getElementById('btn-confirmar-venda').addEventListener('click', function() {
         try {
@@ -315,6 +315,9 @@ document.getElementById('btn-confirmar-venda').addEventListener('click', functio
                 let subTot = item.quantidadeVendida * produtoNEstoque.precoVenda
 
                 valorTotal += subTot
+
+                item.precoUni = produtoNEstoque.precoVenda 
+                item.subtotal = subTot
             }
 
             const venda = new Venda(
@@ -322,7 +325,7 @@ document.getElementById('btn-confirmar-venda').addEventListener('click', functio
                 parcelas,
                 data,
                 valorTotal,
-                shop
+                [...shop]
             );
 
             ultima_venda = venda
@@ -373,12 +376,12 @@ btnPdf.addEventListener("click", function () {
     doc.text(`Data da Venda: ${dataVenda}`, 85, 37, {align: 'right'})
 
     const paraPDF = itens.map(item => {
-        return [item.nome, item.quantidadeVendida];
+        return [item.nome, item.quantidadeVendida, `R$ ${item.subtotal.toFixed(2)}`];
     });
 
     doc.autoTable({
         startY: 45,
-        head: [['Produto', 'Quantidade']],
+        head: [['Produto', 'Quantidade', 'Preço']],
         body: paraPDF,
         theme: 'grid',
         headStyles: { fillColor: [181, 181, 181]}
