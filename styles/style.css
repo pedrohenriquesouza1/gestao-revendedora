@@ -303,54 +303,6 @@ input:focus {
     margin-bottom: 5px;
 }
 
-.tabela-container {
-    margin-top: 15px;
-    overflow-x: auto; 
-    border: 1px solid #eee;
-    border-radius: 8px;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: white;
-    font-size: 0.9rem;
-    min-width: 300px;
-}
-
-thead {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-th, td {
-    padding: 12px 10px;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-}
-
-th:nth-child(2), td:nth-child(2),
-th:nth-child(3), td:nth-child(3) {
-    text-align: right;
-}
-
-tbody tr:nth-child(even) {
-    background-color: #f8f9fa;
-}
-
-td small {
-    display: block;
-    color: #888;
-    margin-top: 2px;
-    font-size: 0.75rem;
-}
-
-#total-gasto-cliente {
-    font-size: 1.1rem;
-    color: var(--primary-color);
-    padding: 10px 0;
-}
-
 #btn-confirmar-venda {
     margin-top: 15px;
 }
