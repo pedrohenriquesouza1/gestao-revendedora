@@ -95,7 +95,9 @@ class Estoque {
     }   
 
     salvarDados() {
-        const dadospSalvar = this.#lista.map(b => b.toJSON())
+        const dadospSalvar = this.#lista.filter(p => p.quant > 0)
+            .filter(produto => produto.quant > 0)
+            .map(produto => produto.toJSON())
         localStorage.setItem('estoqueBoti', JSON.stringify(dadospSalvar))
     }
 
@@ -110,7 +112,7 @@ class Estoque {
                     dado.precoVenda,
                     dado.quant
                 )
-            )
+            ).filter(p => p.quant > 0)
         }
     }
 }
@@ -182,6 +184,7 @@ class Venda {
 
 const gerenciadorEstoque = new Estoque()
 //isso aqui é para adicionar o produtro no estoque, deu um trabalho imenso
+const msgAdicao = document.getElementById('msg-adicao')
 document.getElementById('btn-adicionar').addEventListener('click', function() {
     const nomeImput = document.getElementById('input-nome')
     const inputprecoCompra = document.getElementById('input-compra')
@@ -201,7 +204,10 @@ document.getElementById('btn-adicionar').addEventListener('click', function() {
     const newItem = new Produto(nomeProduto, compraProduto, precoVenda, quantidade)
 
     gerenciadorEstoque.adicionar(newItem)
-    window.alert('Produto adicionado com sucesso!')
+
+    msgAdicao.innerHTML = `<p style="color: green;">"${nomeProduto}" foi adicionado ao estoque com sucesso.</p>`
+    msgAdicao.style.borderLeft = "4px solid green"
+    
 
     nomeImput.value = ""
     inputprecoCompra.value = ""
@@ -319,6 +325,8 @@ document.getElementById('btn-confirmar-venda').addEventListener('click', functio
                 item.precoUni = produtoNEstoque.precoVenda 
                 item.subtotal = subTot
             }
+
+            gerenciadorEstoque.salvarDados()
 
             const venda = new Venda(
                 name,
