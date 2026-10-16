@@ -23,7 +23,7 @@ class Produto {
     }
     
     comparadorNome(nomeBus) { //este método compara o nome com o nome que vai ser utilizado no search, no caso
-        if(this.#nome.toLowerCase() === nomeBus.toLowerCase()) {
+        if(this.#nome.trim().toLowerCase() === nomeBus.trim().toLowerCase()) {
             return true
         } else {
             return false
@@ -40,11 +40,13 @@ class Produto {
     }
 
     darBaixa(quantVend) {
-        if (quantVend <= this.#quant) {
-            this.#quant -= quantVend
-        } else if (quantVend >= this.#quant) {
-            return "A quantidade de itens que você está tendando vender é maior que a quantidade de itens que existe"
+        if (!Number.isInteger(quantVend) || quantVend <= 0) {
+            throw new Error('A quantidade vendida deve ser um número inteiro maior que zero.')
         }
+        if (quantVend > this.#quant) {
+            throw new Error('A quantidade vendida é maior que a quantidade disponível no estoque.')
+        }
+        this.#quant -= quantVend
         console.log(`vendidos ${quantVend} produtos`)
     }
 
@@ -142,11 +144,13 @@ class Venda {
     }
 
     validadorDados() {
-        if (this.#valorTotal <= 0) {
-            throw new Error('Erro! o valor é negativo ou é 0, o valor total tem que ser maior que 1')
-        } 
-        if (this.#nParcelas <= 0) {
-            throw new Error('Erro! o número de parcelas é menor que 0, o número de parcelas deve ser pelo menos 1')
+        if (!this.#nomeCliente.trim()) throw new Error('Preencha o nome da cliente!')
+        if (!Number.isInteger(this.#nParcelas) || this.#nParcelas < 1) {
+            throw new Error('O número de parcelas deve ser um número inteiro maior ou igual a 1.')
+        }
+        if (!Number.isFinite(this.#dataCobranca.getTime())) throw new Error('Informe uma data válida para a cobrança.')
+        if (!Number.isFinite(this.#valorTotal) || this.#valorTotal <= 0) {
+            throw new Error('O valor total da venda deve ser maior que zero.')
         }
     }
 
@@ -183,7 +187,7 @@ class Venda {
 }
 
 const gerenciadorEstoque = new Estoque()
-//isso aqui é para adicionar o produtro no estoque, deu um trabalho imenso
+//isso aqui é para adicionar o produtro no estoque
 const msgAdicao = document.getElementById('msg-adicao')
 document.getElementById('btn-adicionar').addEventListener('click', function() {
     const nomeImput = document.getElementById('input-nome')
@@ -191,13 +195,29 @@ document.getElementById('btn-adicionar').addEventListener('click', function() {
     const inputprecoVenda = document.getElementById('input-venda')
     const inputQuant = document.getElementById('input-quant')
 
-    const nomeProduto = nomeImput.value
+    const nomeProduto = nomeImput.value.trim()
+    if ([inputprecoCompra, inputprecoVenda, inputQuant].some(input => input.value === '')) {
+        msgAdicao.innerHTML = '<p style="color: red;">Preencha os preços e a quantidade.</p>'
+        msgAdicao.style.borderLeft = '4px solid red'
+        return
+    }
     const compraProduto = Number(inputprecoCompra.value)
     const precoVenda = Number(inputprecoVenda.value)
     const quantidade = Number(inputQuant.value)
 
-    if (nomeProduto === "" || inputprecoCompra.value === "") {
-        window.alert("O produto não pode ter valor vazio nem nome")
+    if (!nomeProduto) {
+        msgAdicao.innerHTML = '<p style="color: red;">Informe o nome do produto.</p>'
+        msgAdicao.style.borderLeft = '4px solid red'
+        return
+    }
+    if (!Number.isFinite(compraProduto) || compraProduto <= 0 || !Number.isFinite(precoVenda) || precoVenda <= 0) {
+        msgAdicao.innerHTML = '<p style="color: red;">Os preços devem ser números válidos maiores que zero.</p>'
+        msgAdicao.style.borderLeft = '4px solid red'
+        return
+    }
+    if (!Number.isInteger(quantidade) || quantidade <= 0) {
+        msgAdicao.innerHTML = '<p style="color: red;">A quantidade deve ser um número inteiro maior que zero.</p>'
+        msgAdicao.style.borderLeft = '4px solid red'
         return;
     }
 
@@ -216,8 +236,13 @@ document.getElementById('btn-adicionar').addEventListener('click', function() {
 });
 //pra buscar o produto, eu só copiei de cima o esqueleto, já estava moído
 document.getElementById('btn-buscar').addEventListener('click', function() {
-    const nomeBuscado = document.getElementById('search-nome').value
+    const nomeBuscado = document.getElementById('search-nome').value.trim()
     const divRes = document.getElementById('resultado-busca')
+    if (!nomeBuscado) {
+        divRes.innerHTML = '<p style="color: #d32f2f;">Digite o nome do produto para buscar.</p>'
+        divRes.style.borderLeft = '4px solid #d32f2f'
+        return
+    }
     const res = gerenciadorEstoque.search(nomeBuscado)
     if (res != null) {
         divRes.innerHTML = `
@@ -234,9 +259,13 @@ document.getElementById('btn-buscar').addEventListener('click', function() {
 });
 //remove o produto, aqui eu fiz a mesma coisa dos outros dois
 document.getElementById('btn-remover').addEventListener('click', function(){
-    const nomRem = document.getElementById('remove-nome').value
+    const nomRem = document.getElementById('remove-nome').value.trim()
     const resRem = document.getElementById('msg-remocao')
-    if (nomRem === "") return;
+    if (!nomRem) {
+        resRem.innerHTML = '<p style="color: #d32f2f;">Digite o nome do produto para remover.</p>'
+        resRem.style.borderLeft = '4px solid #d32f2f'
+        return
+    }
     const rem = gerenciadorEstoque.remove(nomRem) 
 
     if (rem) {
@@ -250,13 +279,11 @@ document.getElementById('btn-remover').addEventListener('click', function(){
         resRem.style.borderLeft = "4px solid #d32f2f"
     }
 });
-//frescurinha para a UX
 document.getElementById('search-nome').addEventListener('input', function() {
     const divRes = document.getElementById('resultado-busca');
     divRes.innerHTML = '<span class="placeholder-text">O resultado da busca aparecerá aqui...</span>';
     divRes.style.borderLeft = "none"; 
 });
-//outra frescurinha
 document.getElementById('remove-nome').addEventListener('input', function() {
     const remRes = document.getElementById('msg-remocao')
     remRes.innerHTML = '<span class="placeholder-text">Se remover algum produto, ele aparece aqui...</span>'
@@ -264,29 +291,43 @@ document.getElementById('remove-nome').addEventListener('input', function() {
 });
 
 //função que adiciona produtos no carrinho, essa daqui só cuida da lógica, o código do modal está em outro arquivo
-document.getElementById("btn-adicionar-item-venda").addEventListener("click", function() {    
-    const quantidadeEstoque = Number(document.getElementById('venda-qtd').value)
-    const nomeProduto = document.getElementById('venda-produto-nome').value
-    const produto = gerenciadorEstoque.search(nomeProduto)
+document.getElementById("btn-adicionar-item-venda").addEventListener("click", function() {
+    const caixaMensagem = document.getElementById('msg-venda')
+    try {
+        const inputQuantidade = document.getElementById('venda-qtd').value
+        const quantidadeEstoque = Number(inputQuantidade)
+        const nomeProduto = document.getElementById('venda-produto-nome').value.trim()
+        const produto = gerenciadorEstoque.search(nomeProduto)
 
-    let f = false 
+        if (!nomeProduto) throw new Error('Informe o produto que deseja adicionar.')
+        if (!produto) throw new Error(`O produto "${nomeProduto}" não existe no estoque.`)
+        if (inputQuantidade === '' || !Number.isInteger(quantidadeEstoque) || quantidadeEstoque <= 0) {
+            throw new Error('A quantidade deve ser um número inteiro maior que zero.')
+        }
 
-    for (let item of shop) {
-        if (item.nome === nomeProduto) {
-            item.quantidadeVendida += quantidadeEstoque
-            f = true
-            break
-        } 
+        const itemExistente = shop.find(item => item.nome.trim().toLowerCase() === nomeProduto.toLowerCase())
+        const quantidadeNoCarrinho = itemExistente ? itemExistente.quantidadeVendida : 0
+        if (quantidadeNoCarrinho + quantidadeEstoque > produto.quant) {
+            throw new Error(`A quantidade solicitada excede o estoque disponível (${produto.quant} unidades).`)
+        }
+
+        if (itemExistente) {
+            itemExistente.quantidadeVendida += quantidadeEstoque
+            itemExistente.preco = produto.precoVenda
+        } else {
+            shop.push({
+                nome: nomeProduto,
+                quantidadeVendida: quantidadeEstoque,
+                preco: produto.precoVenda
+            });
+        }
+        renderShop(shop)
+        caixaMensagem.innerHTML = ''
+        caixaMensagem.style.borderLeft = 'none'
+    } catch (erro) {
+        caixaMensagem.innerHTML = `<p style="color: red;">${erro.message}</p>`
+        caixaMensagem.style.borderLeft = '4px solid red'
     }
-
-    if (!f) {
-        shop.push({
-            nome: nomeProduto,
-            quantidadeVendida: quantidadeEstoque,
-            preco: produto.precoCompra
-        });
-    }
-    renderShop(shop)
 });
 //Função de venda, totalmente refatorada
 const caixaMensagem = document.getElementById('msg-venda')
@@ -295,30 +336,47 @@ document.getElementById('btn-confirmar-venda').addEventListener('click', functio
             caixaMensagem.innerHTML = ''
             caixaMensagem.style.borderLeft = 'none'
 
-            const name = document.getElementById('venda-cliente-nome').value 
-            const parcelas = Number(document.getElementById('venda-parcelas').value)
-            const data = new Date (document.getElementById('venda-data').value)
+            const name = document.getElementById('venda-cliente-nome').value.trim()
+            const valorParcelas = document.getElementById('venda-parcelas').value
+            const parcelas = Number(valorParcelas)
+            const valorData = document.getElementById('venda-data').value
+            const [ano, mes, dia] = valorData.split('-').map(Number)
+            const data = valorData ? new Date(ano, mes - 1, dia) : new Date(NaN)
             const dataAtual = new Date()
 
             let valorTotal = 0
-            dataAtual.setHours(0, 0, 0, 0, 0)
+            dataAtual.setHours(0, 0, 0, 0)
             
             if (shop.length === 0) throw new Error('O carrinho está vazio!');
-            if (parcelas < 1) throw new Error('As parcelas devem ser iguais ou maiores que 1');
-            if (data < dataAtual) throw new Error('A data tem que ser maior ou igual a hoje');
-            if (name === "") throw new Error('Preencha o nome da cliente!');
+            if (valorParcelas === '' || !Number.isInteger(parcelas) || parcelas < 1) throw new Error('As parcelas devem ser um número inteiro maior ou igual a 1.');
+            if (!Number.isFinite(data.getTime())) throw new Error('Informe uma data válida para a cobrança.');
+            if (data.getFullYear() !== ano || data.getMonth() !== mes - 1 || data.getDate() !== dia) throw new Error('Informe uma data válida para a cobrança.');
+            if (data < dataAtual) throw new Error('A data tem que ser maior ou igual a hoje.');
+            if (!name) throw new Error('Preencha o nome da cliente!');
 
-
+            const quantidadesPorProduto = new Map()
+            const produtosDaVenda = []
             for (let item of shop) {
                 const produtoNEstoque = gerenciadorEstoque.search(item.nome)
                 
                 if(!produtoNEstoque) {
                     throw new Error(`O produto ${item.nome} não existe no estoque`)
                 }
+                if (!Number.isInteger(item.quantidadeVendida) || item.quantidadeVendida <= 0) {
+                    throw new Error(`A quantidade de ${item.nome} deve ser um número inteiro maior que zero.`)
+                }
+                if (!Number.isFinite(produtoNEstoque.precoVenda) || produtoNEstoque.precoVenda <= 0) {
+                    throw new Error(`O preço de venda de ${item.nome} é inválido.`)
+                }
 
-                produtoNEstoque.darBaixa(item.quantidadeVendida)
-                
+                const quantidadeAcumulada = (quantidadesPorProduto.get(produtoNEstoque) || 0) + item.quantidadeVendida
+                if (quantidadeAcumulada > produtoNEstoque.quant) {
+                    throw new Error(`Estoque insuficiente para ${item.nome}. Disponível: ${produtoNEstoque.quant}.`)
+                }
+                quantidadesPorProduto.set(produtoNEstoque, quantidadeAcumulada)
+
                 let subTot = item.quantidadeVendida * produtoNEstoque.precoVenda
+                if (!Number.isFinite(subTot) || subTot <= 0) throw new Error(`O subtotal de ${item.nome} é inválido.`)
 
                 valorTotal += subTot
 
@@ -326,7 +384,11 @@ document.getElementById('btn-confirmar-venda').addEventListener('click', functio
                 item.subtotal = subTot
             }
 
-            gerenciadorEstoque.salvarDados()
+            for (const [produto, quantidade] of quantidadesPorProduto) {
+                produtosDaVenda.push({ produto, quantidade })
+            }
+
+            if (!Number.isFinite(valorTotal) || valorTotal <= 0) throw new Error('O valor total da venda deve ser maior que zero.')
 
             const venda = new Venda(
                 name,
@@ -335,6 +397,10 @@ document.getElementById('btn-confirmar-venda').addEventListener('click', functio
                 valorTotal,
                 [...shop]
             );
+            venda.validadorDados()
+
+            for (const item of produtosDaVenda) item.produto.darBaixa(item.quantidade)
+            gerenciadorEstoque.salvarDados()
 
             ultima_venda = venda
 
@@ -369,7 +435,7 @@ btnPdf.addEventListener("click", function () {
     const dadosDaVenda = ultima_venda.toJSON()
     const parcelas = ultima_venda.resumoVenda()
     const itens = dadosDaVenda.itens
-    const dataVenda = new Date(dadosDaVenda.data).toLocaleString('pt-br')
+    const dataVenda = new Date().toLocaleString('pt-BR')
     const vFormatado = dadosDaVenda.total.toFixed(2)
 
     doc.setFontSize(18)
@@ -416,4 +482,3 @@ btnPdf.addEventListener("click", function () {
 
     doc.save(`Recibo-${dadosDaVenda.nomeC}.pdf`)
 });
-    

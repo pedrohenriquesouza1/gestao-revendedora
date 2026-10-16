@@ -64,7 +64,8 @@ export function renderShop() {
     let totalItem = 0
 
     if(shop.length <= 0) {
-        console.log("carrinho vazio debug")
+        container.innerHTML = '<p class="placeholder-text">Carrinho vazio.</p>'
+        badgeIcon.textContent = '0'
         return;
     }
 
