@@ -1,87 +1,51 @@
-# Receipt Generator & Inventory System / Gerador de Recibos e Sistema de Estoque
+# Gerenciador de pedidos e gerador de recibos
 
-This project is a pragmatic solution developed to automate the generation of sales receipts and inventory management for a beauty products reseller. It replaces manual paperwork with an automated system that calculates installments, due dates, and generates PDF receipts.
+[English version](README.en.md)
 
-Este projeto é uma solução pragmática desenvolvida para automatizar a geração de recibos de venda e o gerenciamento de estoque para uma revendedora de produtos de beleza. Ele substitui o trabalho manual por um sistema automatizado que calcula parcelas, datas de vencimento e gera recibos em PDF.
+Aplicação web criada para organizar o estoque e registrar as vendas de uma revendedora de produtos de beleza. Ela reúne o cadastro de produtos, a montagem de um carrinho, o cálculo de vendas parceladas e a geração de recibos em PDF em uma interface que funciona no navegador.
 
-## 🚀 Features / Funcionalidades
-Inventory Management: Full CRUD for products with cost and sale price calculation.
+[**Acesso à aplicação**](https://gestao-revendedora.vercel.app/)
 
-Installment Logic: Automatic calculation of monthly installments based on a start date.
+## O que o sistema faz
 
-PDF Generation: Creates professional receipts ready to be shared via WhatsApp.
+- **Estoque:** cadastra produtos com nome, preço de compra, preço de venda e quantidade. Permite buscar um produto pelo nome, consultar seu saldo e lucro por unidade, e remover um cadastro.
+- **Carrinho:** adiciona produtos do estoque, soma quantidades do mesmo item e mostra o valor calculado pelo preço de venda. A inclusão respeita a quantidade disponível.
+- **Vendas:** recebe o nome da cliente, o número de parcelas e a data da primeira cobrança. Ao confirmar, calcula o total, reduz o estoque e salva os dados da venda.
+- **Recibos:** gera um PDF da venda confirmada com cliente, itens, quantidades, total, parcelas e vencimentos. O documento mostra a data e a hora em que foi gerado.
+- **Persistência:** salva estoque e vendas no `localStorage` do navegador.
 
-Local Persistence: Data is stored locally in the browser for privacy and speed.
+## Como usar
 
-Gestão de Estoque: CRUD completo de produtos com cálculo de preço de custo e venda.
+1. Na aba **Estoque**, informe o nome do produto, o valor de compra, o valor de venda e a quantidade. Clique em **Adicionar**.
+2. Use **Buscar no Estoque** para consultar um produto. A busca pelo nome ignora diferenças entre letras maiúsculas e minúsculas.
+3. Na aba **Vendas/Clientes**, informe o nome da cliente, o nome de um produto cadastrado e a quantidade desejada. Clique em **Adicionar Produto**. Repita para incluir outros itens e abra o ícone do carrinho para conferir o pedido.
+4. Escolha o número de parcelas e a data da primeira cobrança. Clique em **Confirmar Venda**. O sistema calcula o valor total, registra a venda e atualiza o estoque.
+5. Clique em **Gerar Recibo em PDF** para baixar o documento da venda que acabou de ser confirmada.
 
-Lógica de Parcelamento: Cálculo automático de parcelas mensais baseado em uma data de início.
+Os preços devem ser maiores que zero; quantidades e número de parcelas devem ser números inteiros positivos. A data da primeira cobrança deve ser a de hoje ou uma data futura. Os avisos de validação aparecem nas seções correspondentes da interface.
 
-Geração de PDF: Cria recibos profissionais prontos para serem compartilhados via WhatsApp.
+## Como foi feito
 
-Persistência Local: Dados salvos localmente no navegador para privacidade e agilidade.
+O projeto usa **HTML**, **CSS** e **JavaScript com módulos ES**. O Vite executa o ambiente de desenvolvimento e produz os arquivos estáticos de publicação.
 
-## 🧠 Logic Planning (The "Wireframe" Approach) / Planejamento Lógico
-Unlike generic AI-generated templates, this project follows a strict Logic-First approach. Before implementation, the entire data flow was mapped using Excalidraw to ensure:
+Em `src/control.js`, as classes `Produto`, `Estoque` e `Venda` organizam as informações e as regras principais. Esse módulo também conecta os formulários da página às operações de cadastro, busca, remoção, carrinho, confirmação da venda e emissão do recibo. O arquivo `src/modal.js` controla a abertura e o conteúdo do carrinho. A interface fica em `index.html`, `styles/style.css` e `styles/modal.module.css`.
 
-Data integrity between the Inventory and Sales modules.
+O estoque é salvo na chave `estoqueBoti` e as vendas na chave `vendas` do `localStorage`. Para gerar o recibo, a aplicação usa **jsPDF** e **jsPDF-AutoTable**. O repositório também inclui um workflow do GitHub Actions que gera o projeto com Vite e publica os arquivos no GitHub Pages.
 
-Accurate date manipulation for credit payments.
+## Executar localmente
 
-A clean User Experience (UX) focused on efficiency.
+É necessário ter Node.js e npm instalados.
 
-Diferente de templates genéricos gerados por IA, este projeto segue uma abordagem de Lógica Primeiro. Antes da implementação, todo o fluxo de dados foi mapeado usando o Excalidraw para garantir:
+```bash
+git clone https://github.com/pedrohenriquesouza1/gestao-revendedora.git
+cd gestao-revendedora
+npm ci
+npm run dev
+```
 
-Integridade de dados entre os módulos de Estoque e Vendas.
+Abra no navegador o endereço local exibido pelo Vite. Para gerar e visualizar a versão de produção:
 
-Manipulação precisa de datas para pagamentos parcelados.
-
-Uma experiência de usuário (UX) limpa e focada em eficiência.
-
-### 🛠️ Tech Stack / Tecnologias
-Vanilla JavaScript (ES6+): Object-Oriented Programming (Classes, Private Methods).
-
-HTML5 & CSS3: Responsive Layout and custom styling.
-
-Local Storage API: For data persistence.
-
-JavaScript Puro (ES6+): Programação Orientada a Objetos (Classes, Métodos Privados).
-
-HTML5 e CSS3: Layout responsivo e estilização customizada.
-
-API Local Storage: Para persistência de dados.
-
-### 📜 How it Works / Como funciona
-
-#### wireframe 
-![alt text](image.png)
-The system architecture follows the logical flow mapped in the wireframe above, ensuring a seamless transition from inventory to the final receipt:
-
-A arquitetura do sistema segue o fluxo lógico mapeado no wireframe acima, garantindo uma transição fluida do estoque para o recibo final:
-
-##### 1. Data Retrieval (Input) / Recuperação de Dados (Entrada)
-Product Linkage: The system fetches the unit price and name directly from the Inventory Class based on the user's selection.
-
-Vínculo de Produto: O sistema busca o preço unitário e o nome diretamente da Classe Estoque com base na seleção do usuário.
-
-Variable Inputs: The user defines the customer's name, the number of installments, and the billing start date.
-
-Entradas Variáveis: O usuário define o nome da cliente, o número de parcelas e a data de início da cobrança.
-
-##### 2. Processing Engine (The Logic) / Mecanismo de Processamento (A Lógica)
-Installment Calculation: The total price is divided by the number of installments. The system uses a loop to project future dates, ensuring each payment falls on the same day of the following months.
-
-Cálculo de Parcelas: O preço total é dividido pelo número de parcelas. O sistema usa um loop para projetar datas futuras, garantindo que cada pagamento caia no mesmo dia dos meses seguintes.
-
-Data Integrity: Since the inventory is the "Source of Truth", any price update in the stock is reflected in new receipts.
-
-Integridade de Dados: Como o estoque é a "Fonte da Verdade", qualquer atualização de preço no estoque é refletida nos novos recibos.
-
-##### 3. Document Output / Saída do Documento
-Dynamic Preview: A visual template is populated in real-time with the calculated data.
-
-Preview Dinâmico: Um template visual é preenchido em tempo real com os dados calculados.
-
-PDF Export: The HTML structure is converted into a clean PDF file, optimized for mobile sharing (WhatsApp).
-
-Exportação para PDF: A estrutura HTML é convertida em um arquivo PDF limpo, otimizado para compartilhamento via celular (WhatsApp).
+```bash
+npm run build
+npm run preview
+```

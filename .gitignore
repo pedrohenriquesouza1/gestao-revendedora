@@ -9,6 +9,4 @@ dist-ssr/
 .env.local
 .env.*.local
 
-descricao.md
-melhorias.md
-tests.md
+dev_docs/
